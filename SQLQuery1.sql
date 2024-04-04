@@ -25,11 +25,8 @@ CREATE TABLE PHs (
 	PHaddress NVARCHAR (50),
 	PHphone VARCHAR (12),
 	PHbank VARCHAR (20),
-	unpaid_amount int,
+   unpaid_amount int CHECK (unpaid_amount <= 40000000)
 );
-
-
-
 ALTER TABLE book
 ADD CONSTRAINT FK_book_PHid FOREIGN KEY (PHid) REFERENCES PHs (PHid);
 
@@ -38,7 +35,7 @@ CREATE TABLE AGENT (
 	agentname NVARCHAR (50),
 	agentphone VARCHAR (12),
 	agentaddr NVARCHAR (50),
-	amount_owed int CHECK (amount_owed <= 4000000)
+	amount_owed int CHECK (amount_owed <= 40000000)
 );
 
 CREATE TABLE import (
@@ -49,11 +46,14 @@ CREATE TABLE import (
 	Deliver NVARCHAR (50),
 	bookid VARCHAR (15),
 	quantity int,
+	price int,
 	DOD date,
-	SED date
+	SED date,
+	total int,
 	FOREIGN KEY (bookid) REFERENCES book (bookid),
 	FOREIGN KEY (PHid) REFERENCES PHs (PHid)
 );
+
 
 CREATE TABLE export (
 	exportid VARCHAR (15) PRIMARY KEY,
@@ -63,8 +63,10 @@ CREATE TABLE export (
 	Deliver NVARCHAR (50),
 	bookid VARCHAR (15),
 	quantity int,
+	price int,
 	DOD date,
-	SID date
+	SID date,
+	total int,
 	FOREIGN KEY (bookid) REFERENCES book (bookid),
 	FOREIGN KEY (agentid) REFERENCES AGENT (agentid)
 );
@@ -82,10 +84,18 @@ CREATE TABLE agent_sta(
 	agentid VARCHAR (15),
 	bookid VARCHAR (15),
 	sold_quantity int,
-	PRIMARY KEY (agent_sta_id, agentid),
+	PRIMARY KEY (agent_sta_id),
 	FOREIGN KEY (bookid) REFERENCES book (bookid),
 );
 
+CREATE TABLE statistic(
+	statisticid VARCHAR (15),
+	PHid VARCHAR (15),
+	bookid VARCHAR (15),
+	unsold_quantity int,
+	PRIMARY KEY (statisticid),
+	FOREIGN KEY (bookid) REFERENCES book (bookid),
+);
 
 CREATE TABLE sales (
     SaleID INT PRIMARY KEY,
@@ -221,9 +231,52 @@ INSERT INTO book VALUES
 
 INSERT INTO AGENT (agentid, agentname, agentphone, agentaddr, amount_owed)
 VALUES 
-    ('AGT001', N'Đại lý A', '123456789', N'Địa chỉ A', 1000000),
-    ('AGT002', N'Đại lý B', '234567890', N'Địa chỉ B', 800000),
-    ('AGT003', N'Đại lý C', '345678901', N'Địa chỉ C', 3000000),
+    ('AGT001', N'Đại lý A', '123456789', N'Địa chỉ A', 10000000),
+    ('AGT002', N'Đại lý B', '234567890', N'Địa chỉ B', 8000000),
+    ('AGT003', N'Đại lý C', '345678901', N'Địa chỉ C', 30000000),
     ('AGT004', N'Đại lý D', '456789012', N'Địa chỉ D', 0),
-    ('AGT005', N'Đại lý E', '567890123', N'Địa chỉ E', 2600000),
-    ('AGT006', N'Đại lý F', '678901234', N'Địa chỉ F', 1689800);
+    ('AGT005', N'Đại lý E', '567890123', N'Địa chỉ E', 26000000),
+    ('AGT006', N'Đại lý F', '678901234', N'Địa chỉ F', 16898000);
+
+
+
+
+-- Thêm dữ liệu mẫu vào bảng agent_sta
+INSERT INTO agent_sta (agent_sta_id, agentid, bookid, sold_quantity)
+VALUES
+    -- Thêm 15 bản ghi mẫu
+    -- agentid = AGT001
+    (1, 'AGT001', 'F00007', 1700),
+    (2, 'AGT001', 'J00010', 1200),
+    -- agentid = AGT002
+    (3, 'AGT002', 'D00002', 1800),
+    (4, 'AGT002', 'I00003', 1400),
+    (5, 'AGT002', 'H00001', 1600),
+    -- agentid = AGT003
+    (6, 'AGT003', 'J00007', 2000),
+    (7, 'AGT003', 'E00003', 1300),
+    (8, 'AGT003', 'D00005', 1900),
+    -- agentid = AGT004
+    (9, 'AGT004', 'B00002', 1500),
+    (10, 'AGT004','I00004', 1700),
+    (11, 'AGT004','J00009', 1200),
+    -- agentid = AGT005
+    (12, 'AGT005', 'J00004', 1800),
+    (13, 'AGT005', 'G00002', 1400),
+    (14, 'AGT005', 'F00008', 1600);
+
+	Select * From agent_sta order by agent_sta_id desc
+
+INSERT INTO statistic (statisticid, PHid, bookid, unsold_quantity) VALUES
+('1', 'PUB01', 'J00004', 50),
+('2', 'PUB02', 'F00008', 30),
+('3', 'PUB03', 'J00009', 40),
+('4', 'PUB04', 'I00004', 25),
+('5', 'PUB05', 'J00010', 20),
+('6', 'PUB06', 'D00005', 35),
+('7', 'PUB07', 'H00005', 45),
+('8', 'PUB01', 'A00001', 55),
+('9', 'PUB02', 'J00008', 28),
+('10','PUB03', 'E00001', 37);
+
+select * from import
