@@ -1,0 +1,157 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using System.Data.SqlClient;
+
+namespace HeThongSach
+{
+    public partial class ThongCute : Form
+    {
+        Statistic Sta;
+        UnsoldBooks Uns;
+        string Message = "Print Complete!";
+        string title = "Notification!";
+
+        public SqlConnection cn = new SqlConnection();
+        DataTable dt = new DataTable();
+        String str = @"Data Source=DESKTOP-RQNCF8U;Initial Catalog=BookStore;Integrated Security=True";
+        public void Connect()
+        {
+            try
+            {
+                if (cn.State == 0)
+                {
+                    cn.ConnectionString = "Data Source=DESKTOP-RQNCF8U;Initial Catalog=BookStore;Integrated Security=True";
+                    cn.Open();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public void Disconnect()
+        {
+            if (cn.State != 0)
+            {
+                cn.Close();
+            }
+        }
+
+        public DataTable Showdata(String sql)
+        {
+            Connect();
+            SqlDataAdapter adap = new SqlDataAdapter(sql, cn);
+            DataTable dt = new DataTable();
+            adap.Fill(dt);
+            return dt;
+            Disconnect();
+        }
+
+        public SqlCommand Execute(string sql)
+        {
+            Connect();
+            SqlCommand cm = new SqlCommand(sql, cn);
+            cm.ExecuteNonQuery();
+            return cm;
+            Disconnect();
+        }
+
+        void Display()
+        {
+            cn.Close();
+            cn.Open();
+            SqlCommand cm = cn.CreateCommand();
+            cm.CommandText = "select * from agent_sta";
+            SqlDataAdapter adap = new SqlDataAdapter();
+            adap.SelectCommand = cm;
+            dt.Clear();
+            adap.Fill(dt);
+            dataGridView1.DataSource = dt;
+        }
+
+        public ThongCute()
+        {
+            InitializeComponent();
+        }
+
+        private void statisticToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Sta = new Statistic();
+            Sta.Show();
+            this.Close();
+        }
+
+        private void unsoldBooksToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Uns = new UnsoldBooks();
+            Uns.Show();
+            this.Close();
+        }
+
+        private void ThongCute_Load(object sender, EventArgs e)
+        {
+            cn = new SqlConnection(str);
+            cn.Open();
+            Display();
+        }
+        /*agent_sta_id VARCHAR (15),      textBox4
+          agentid VARCHAR (15),           textBox1
+          bookid VARCHAR (15),            textBox2
+          sold_quantity int,              textBox3*/
+        private void button1_Click(object sender, EventArgs e)//add
+        {
+            SqlCommand cm = new SqlCommand();
+            cm = cn.CreateCommand();
+            cm.CommandText = "insert into agent_sta values('" + textBox4.Text + "',N'"
+                + textBox1.Text + "', N'" + textBox2.Text + "','" + textBox3.Text + "')";
+            cm.ExecuteNonQuery();
+            Display();
+        }
+
+        private void button4_Click(object sender, EventArgs e)//search
+        {
+            if (textBox1.Text == "AGT001")
+            {
+                dataGridView1.DataSource = Showdata("select * from agent_sta where agentid = 'AGT001'");
+            }
+            else if (textBox1.Text == "AGT002")
+            {
+                dataGridView1.DataSource = Showdata("select * from agent_sta where agentid = 'AGT002'");
+            }
+            else if (textBox1.Text == "AGT003")
+            {
+                dataGridView1.DataSource = Showdata("select * from agent_sta where agentid = 'AGT003'");
+            }
+            else if (textBox1.Text == "AGT004")
+            {
+                dataGridView1.DataSource = Showdata("select * from agent_sta where agentid = 'AGT004'");
+            }
+            else if (textBox1.Text == "AGT005")
+            {
+                dataGridView1.DataSource = Showdata("select * from agent_sta where agentid = 'AGT005'");
+            }
+            else if (textBox1.Text == "AGT006") 
+            {
+                dataGridView1.DataSource = Showdata("select * from agent_sta where agentid = 'AGT006'");
+            }
+        }
+
+        private void button3_Click(object sender, EventArgs e)//print
+        {
+            MessageBox.Show(Message, title);
+        }
+
+        private void dataGridView1_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+
+        }
+    }
+}
